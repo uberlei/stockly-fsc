@@ -6,6 +6,8 @@ import { getProduct } from "../_data-acess/product/get-product";
 
 const Products = async () => {
   const products = await getProduct();
+  // const response = await fetch("http://localhost:3000/api/products");
+  // const products = await response.json();
 
   return (
     <div className="m-8 w-full space-y-8 rounded-lg bg-white p-8 px-8">
@@ -21,7 +23,10 @@ const Products = async () => {
           Novo Produto
         </Button>
       </div>
-      <DataTable columns={productTableColumns} data={products} />
+      <DataTable
+        columns={productTableColumns}
+        data={JSON.parse(JSON.stringify(products))}
+      />
     </div>
   );
 };
