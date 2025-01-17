@@ -1,5 +1,10 @@
 "use client";
 
+import { createProduct } from "@/app/_actions/products/create-product";
+import {
+  createProductSchema,
+  CreateProductSchema,
+} from "@/app/_actions/products/create-product/shema";
 import { Button } from "@/app/_components/ui/button";
 import {
   Dialog,
@@ -21,32 +26,17 @@ import {
 } from "@/app/_components/ui/form";
 import { Input } from "@/app/_components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusIcon } from "lucide-react";
+import { Loader2Icon, PlusIcon } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
-import { z } from "zod";
-
-const formSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(3, { message: "O nome deve ter pelo menos 3 caracteres" })
-    .max(50, { message: "O nome deve ter no máximo 50 caracteres" }),
-  price: z.coerce
-    .number()
-    .min(0.01, { message: "O preço deve ser maior que 0" }),
-  stock: z.coerce
-    .number()
-    .positive({ message: "O estoque deve ser maior que 0" })
-    .int({ message: "O estoque deve ser um número inteiro" }),
-});
-
-type FormSchema = z.infer<typeof formSchema>;
 
 export function AddProductButton() {
-  const form = useForm<FormSchema>({
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const form = useForm<CreateProductSchema>({
     shouldUnregister: true,
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(createProductSchema),
     defaultValues: {
       name: "",
       price: 0,
@@ -54,12 +44,17 @@ export function AddProductButton() {
     },
   });
 
-  const onSubmit = (data: FormSchema) => {
-    console.log(data);
+  const onSubmit = async (data: CreateProductSchema) => {
+    try {
+      await createProduct(data);
+      setDialogOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
-    <Dialog>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <Button className="gap-2">
           <PlusIcon />
@@ -137,7 +132,16 @@ export function AddProductButton() {
                   Cancelar
                 </Button>
               </DialogClose>
-              <Button type="submit">Criar</Button>
+              <Button
+                type="submit"
+                disabled={form.formState.isSubmitting}
+                className="gap-1.5"
+              >
+                {form.formState.isSubmitting && (
+                  <Loader2Icon className="animate-spin" size={16} />
+                )}
+                Criar
+              </Button>
             </DialogFooter>
           </form>
         </Form>
