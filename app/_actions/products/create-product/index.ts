@@ -11,5 +11,6 @@ export const createProduct = async (data: CreateProductSchema) => {
         data: data,
     });
     revalidatePath("/products");
+    // revalidateTag("get-products"); revalidar apenas um cache
 };
 

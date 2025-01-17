@@ -11,6 +11,7 @@ export const getProducts = async (): Promise<Product[]> => {
 
 export const cacheGetMemoizedProducts = cache(getProducts);
 
-export const cacheGetProducts = unstable_cache(getProducts, ["get-products"], {
-    revalidate: 5,
+export const cacheGetProducts = unstable_cache(getProducts, ["getProducts"], {
+    tags: ["get-products"],
+    revalidate: 60,
 });
