@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import SideBar from "./_components/sidebar";
 import { Inter } from "next/font/google";
+import { Toaster } from "./_components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,6 +25,7 @@ export default function RootLayout({
         <div className="flex h-full">
           <SideBar />
           {children}
+          <Toaster />
         </div>
       </body>
     </html>
