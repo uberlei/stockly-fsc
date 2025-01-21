@@ -1,7 +1,7 @@
 import { PlusIcon } from "lucide-react";
 import { Button } from "../_components/ui/button";
 import { DataTable } from "../_components/ui/data-table";
-import { productTableColumns } from "./_components/table-columns";
+import { productTableColumns } from "./_components/product-table-columns";
 import { cacheGetProducts } from "../_data-acess/product/get-product";
 
 // Deixa a pagina dinâmica quando requisao é feito utilizando banco de dados const products = await getProduct();

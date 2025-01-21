@@ -1,5 +1,5 @@
 import { DataTable } from "../_components/ui/data-table";
-import { productTableColumns } from "./_components/table-columns";
+import { productTableColumns } from "./_components/product-table-columns";
 import {
   cacheGetProducts,
   getProducts,
