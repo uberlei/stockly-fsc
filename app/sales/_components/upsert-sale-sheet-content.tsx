@@ -16,6 +16,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/app/_components/ui/form";
 import { Combobox, ComboboxOption } from "@/app/_components/ui/combobox";
 import { Button } from "@/app/_components/ui/button";
@@ -32,6 +33,7 @@ import {
   TableFooter,
 } from "@/app/_components/ui/table";
 import { formatCurrency } from "@/app/_helpers/currency";
+import TableSaleDropdownMenu from "./table-sale-dropdown-menu";
 
 const formSchema = z.object({
   productId: z.string().uuid({
@@ -69,7 +71,7 @@ const UpsertSaleSheetContent = ({
     resolver: zodResolver(formSchema),
     defaultValues: {
       productId: "",
-      quantity: 0,
+      quantity: 1,
     },
   });
 
@@ -113,6 +115,12 @@ const UpsertSaleSheetContent = ({
     [selectedProducts],
   );
 
+  const onDeleteProduct = (productId: string) => {
+    setSelectedProducts((currentProducts) =>
+      currentProducts.filter((product) => product.id !== productId),
+    );
+  };
+
   return (
     <SheetContent className="!max-w-[700px]">
       <SheetHeader>
@@ -136,6 +144,7 @@ const UpsertSaleSheetContent = ({
                     placeholder="Selecione um produto"
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -148,11 +157,11 @@ const UpsertSaleSheetContent = ({
                 <FormControl>
                   <Input
                     type="number"
-                    min={1}
                     placeholder="Digite a quantidade"
                     {...field}
                   />
                 </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -170,6 +179,7 @@ const UpsertSaleSheetContent = ({
             <TableHead>Preço unitário</TableHead>
             <TableHead>Quantidade</TableHead>
             <TableHead className="text-right">Total</TableHead>
+            <TableHead>Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -181,6 +191,12 @@ const UpsertSaleSheetContent = ({
               <TableCell className="text-right">
                 {formatCurrency(product.price * product.quantity)}
               </TableCell>
+              <TableCell>
+                <TableSaleDropdownMenu
+                  product={product}
+                  onDelete={onDeleteProduct}
+                />
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -190,6 +206,7 @@ const UpsertSaleSheetContent = ({
             <TableCell className="text-right">
               {formatCurrency(productsTotal)}
             </TableCell>
+            <TableCell></TableCell>
           </TableRow>
         </TableFooter>
       </Table>
