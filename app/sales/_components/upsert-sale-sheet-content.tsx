@@ -86,6 +86,13 @@ const UpsertSaleSheetContent = ({
         (product) => product.id === selectedProduct.id,
       );
       if (existingProduct) {
+        if (existingProduct.quantity + data.quantity > selectedProduct.stock) {
+          form.setError("quantity", {
+            message: "Quantidade de produto não disponível em estoque",
+          });
+          return currentProducts;
+        }
+
         return currentProducts.map((product) =>
           product.id === selectedProduct.id
             ? { ...product, quantity: product.quantity + data.quantity }
