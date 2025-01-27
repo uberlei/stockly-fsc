@@ -5,7 +5,7 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
 export const getProducts = async (): Promise<Product[]> => {
-    const products = await db.product.findMany();
+    const products = await db.product.findMany({ orderBy: { name: "asc" } });
     return products;
 };
 
