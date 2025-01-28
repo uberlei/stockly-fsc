@@ -35,9 +35,11 @@ import {
 } from "@/app/_components/ui/table";
 import { formatCurrency } from "@/app/_helpers/currency";
 import TableSaleDropdownMenu from "./table-sale-dropdown-menu";
-import { Check, CheckIcon } from "lucide-react";
+import { CheckIcon } from "lucide-react";
 import { createSale } from "@/app/_actions/sale/create-sale";
 import { toast } from "sonner";
+import { useAction } from "next-safe-action/hooks";
+import { flattenValidationErrors } from "next-safe-action";
 
 const formSchema = z.object({
   productId: z.string().uuid({
@@ -72,6 +74,17 @@ const UpsertSaleSheetContent = ({
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(
     [],
   );
+  const { execute: executeCreateSale } = useAction(createSale, {
+    onSuccess: () => {
+      form.reset();
+      toast.success("Venda realizada com sucesso");
+      setSheetIsOpen(false);
+    },
+    onError: ({ error: { validationErrors, serverError } }) => {
+      const flattenedErrors = flattenValidationErrors(validationErrors);
+      toast.error(serverError ?? flattenedErrors.formErrors.join("\n"));
+    },
+  });
 
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
@@ -106,6 +119,13 @@ const UpsertSaleSheetContent = ({
         );
       }
 
+      if (data.quantity > selectedProduct.stock) {
+        form.setError("quantity", {
+          message: "Quantidade de produto não disponível em estoque",
+        });
+        return currentProducts;
+      }
+
       return [
         ...currentProducts,
         {
@@ -135,18 +155,12 @@ const UpsertSaleSheetContent = ({
   };
 
   const onSubmitSale = async () => {
-    try {
-      await createSale({
-        products: selectedProducts.map((product) => ({
-          id: product.id,
-          quantity: product.quantity,
-        })),
-      });
-      toast.success("Venda realizada com sucesso");
-      setSheetIsOpen(false);
-    } catch (error) {
-      toast.error("Erro ao realizar venda");
-    }
+    executeCreateSale({
+      products: selectedProducts.map((product) => ({
+        id: product.id,
+        quantity: product.quantity,
+      })),
+    });
   };
 
   return (

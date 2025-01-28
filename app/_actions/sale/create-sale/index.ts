@@ -1,11 +1,12 @@
 "use server"
 
 import { db } from "@/app/_lib/prisma";
-import { CreateSaleSchema, createSaleShema } from "./shema";
+import { createSaleShema } from "./shema";
 import { revalidatePath } from "next/cache";
+import { actionClient } from "@/app/_lib/safe-action";
+import { returnValidationErrors } from "next-safe-action";
 
-export const createSale = async (data: CreateSaleSchema) => {
-    createSaleShema.parse(data);
+export const createSale = actionClient.schema(createSaleShema).action(async ({ parsedInput: { products } }) => {
 
     await db.$transaction(async (trx) => {
 
@@ -15,7 +16,7 @@ export const createSale = async (data: CreateSaleSchema) => {
             },
         });
 
-        for (const product of data.products) {
+        for (const product of products) {
             const productFromDB = await db.product.findUnique({
                 where: {
                     id: product.id,
@@ -23,11 +24,11 @@ export const createSale = async (data: CreateSaleSchema) => {
             });
 
             if (!productFromDB) {
-                throw new Error(`Product with id ${product.id} not found`);
+                returnValidationErrors(createSaleShema, { _errors: [`Product with id ${product.id} not found`] });
             }
 
             if (productFromDB.stock < product.quantity) {
-                throw new Error(`Product with id ${product.id} has insufficient stock`);
+                returnValidationErrors(createSaleShema, { _errors: [`Product with id ${product.id} has insufficient stock`] });
             }
 
             await trx.saleProduct.create({
@@ -45,4 +46,5 @@ export const createSale = async (data: CreateSaleSchema) => {
 
     revalidatePath("/sales");
     revalidatePath("/products");
-}
+
+});
