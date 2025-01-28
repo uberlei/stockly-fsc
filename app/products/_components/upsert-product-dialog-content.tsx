@@ -27,16 +27,32 @@ import {
   FormMessage,
   Form,
 } from "@/app/_components/ui/form";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+import { flattenValidationErrors } from "next-safe-action";
+import { Dispatch, SetStateAction } from "react";
 
 interface UpsertProductDialogContentProps {
   defaultValues?: CreateProductSchema;
-  onSuccess?: () => void;
+  setDialogOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 const UpsertProductDialogContent = ({
   defaultValues,
-  onSuccess,
+  setDialogOpen,
 }: UpsertProductDialogContentProps) => {
+  const { execute: executeUpsertProduct } = useAction(upsertProduct, {
+    onSuccess: () => {
+      toast.success("Produto salvo com sucesso.");
+      setDialogOpen(false);
+    },
+    onError: ({ error: { validationErrors, serverError } }) => {
+      const flattenedErrors = flattenValidationErrors(validationErrors);
+
+      toast.error(serverError ?? flattenedErrors.formErrors.join("\n"));
+    },
+  });
+
   const form = useForm<CreateProductSchema>({
     shouldUnregister: true,
     resolver: zodResolver(createProductSchema),
@@ -49,15 +65,8 @@ const UpsertProductDialogContent = ({
 
   const isEditing = !!defaultValues;
 
-  const onSubmit = async (data: CreateProductSchema) => {
-    try {
-      await upsertProduct({ ...data, id: defaultValues?.id });
-      onSuccess?.();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
+  const onSubmit = (data: CreateProductSchema) =>
+    executeUpsertProduct({ ...data, id: defaultValues?.id });
   return (
     <DialogContent>
       <Form {...form}>

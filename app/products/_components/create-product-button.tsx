@@ -17,7 +17,7 @@ export function AddProductButton() {
           Novo Produto
         </Button>
       </DialogTrigger>
-      <UpsertProductDialogContent onSuccess={() => setDialogOpen(false)} />
+      <UpsertProductDialogContent setDialogOpen={setDialogOpen} />
     </Dialog>
   );
 }
