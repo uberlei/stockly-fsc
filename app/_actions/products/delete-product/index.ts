@@ -3,14 +3,13 @@
 import { db } from "@/app/_lib/prisma";
 import { deleteProductSchema, DeleteProductSchema } from "./shema";
 import { revalidatePath } from "next/cache";
+import { actionClient } from "@/app/_lib/safe-action";
 
-
-export async function deleteProduct({ id }: DeleteProductSchema) {
-    deleteProductSchema.parse({ id });
+export const deleteProduct = actionClient.schema(deleteProductSchema).action(async ({ parsedInput: { id } }) => {
     await db.product.delete({
         where: {
             id: id,
         },
     });
     revalidatePath("/products");
-}
+});
